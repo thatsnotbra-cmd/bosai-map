@@ -4,15 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>防災マップ</title>
-    
-    <!-- ========================================== -->
-    <!-- ▼ Googleアナリティクスのコードはここに貼り付けます ▼ -->
-    <!-- ========================================== -->
 
     <style>
         body, html { margin: 0; padding: 0; height: 100%; font-family: sans-serif; overflow: hidden; background-color: #eef0f4; touch-action: none; }
         
-        /* ▼ PC用レイアウト（基本設定） ▼ */
         #top-menu { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100px; 
             background: #2c3e50; padding: 0 20px; display: flex; gap: 12px; 
@@ -32,9 +27,7 @@
         }
 
         .school-logo { height: 50px; object-fit: contain; pointer-events: none; }
-        
         .header-banner { height: 80px; margin-left: auto; object-fit: contain; pointer-events: none; }
-        
         #arrow-btn { margin-left: 15px; font-weight: bold; font-size: 18px; padding: 10px 20px; border-radius: 25px; }
 
         #map-container { width: 100%; height: 100%; padding-top: 100px; box-sizing: border-box; overflow: hidden; position: relative; }
@@ -60,28 +53,16 @@
         .zoom-btn:active { background: #e0e0e0; }
         .reset-btn { font-size: 11px; height: 50px; line-height: normal; padding: 0; }
 
-        /* ========================================== */
-        /* ▼ スマホ用表示設定（画面幅が768px以下の場合） ▼ */
-        /* ========================================== */
         @media screen and (max-width: 768px) {
             #top-menu { height: 60px; padding: 0 10px; gap: 8px; }
             .menu-btn { padding: 6px 12px; font-size: 13px; }
             #arrow-btn { font-size: 13px; padding: 6px 12px; }
-
-            /* スマホでは重なりを防ぐためヘッダーの長文タイトルとバナー画像を非表示 */
             .school-title, .header-banner { display: none; }
-
             #map-container { padding-top: 60px; }
-
-            /* マップ画像を画面幅いっぱいに使えるよう最大幅を拡大 */
             #map-image { max-width: 90%; max-height: 80%; }
-
-            /* スマホの狭い画面では重なり防止のため左右のパネルを非表示 */
             .ui-panel { display: none; }
-
             #floor-menu { bottom: 20px; left: 20px; gap: 10px; }
             .floor-btn { width: 50px; height: 50px; font-size: 18px; }
-
             #zoom-controls { bottom: 20px; right: 20px; gap: 6px; }
             .zoom-btn { width: 42px; height: 42px; font-size: 20px; }
             .reset-btn { height: 42px; font-size: 10px; }
@@ -103,7 +84,6 @@
         </div>
         
         <img src="images/メッセージ.png" class="header-banner" alt="正しい避難を心がけましょう" onerror="this.style.display='none'">
-        
         <button id="arrow-btn" class="menu-btn" onclick="toggleArrow()">避難経路: OFF</button>
     </div>
 
@@ -117,9 +97,10 @@
 
     <div id="floor-menu"></div>
 
+    <!-- ズーム率の刻みを 0.2 に変更 -->
     <div id="zoom-controls">
-        <button class="zoom-btn" onclick="zoomMap(0.5)">＋</button>
-        <button class="zoom-btn" onclick="zoomMap(-0.5)">－</button>
+        <button class="zoom-btn" onclick="zoomMap(0.2)">＋</button>
+        <button class="zoom-btn" onclick="zoomMap(-0.2)">－</button>
         <button class="zoom-btn reset-btn" onclick="resetZoom()">リセット</button>
     </div>
 
@@ -164,7 +145,7 @@
         function zoomMap(step) {
             currentScale += step;
             if(currentScale < 0.5) currentScale = 0.5; 
-            if(currentScale > 3.5) currentScale = 3.5; 
+            if(currentScale > 4.0) currentScale = 4.0; 
             updateTransform();
         }
 
@@ -180,18 +161,50 @@
         let isDragging = false;
         let startX = 0, startY = 0;
 
-        function startDrag(e) {
-            if (e.target !== mapImage) return;
+        // ピンチ操作用変数
+        let initialDistance = null;
+        let initialScale = 1;
 
-            isDragging = true;
-            let clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-            let clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
-            
-            startX = clientX - translateX;
-            startY = clientY - translateY;
+        function getDistance(touch1, touch2) {
+            const dx = touch1.clientX - touch2.clientX;
+            const dy = touch1.clientY - touch2.clientY;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        function startDrag(e) {
+            if (e.type.includes('touch')) {
+                if (e.touches.length === 2) {
+                    // 2本指タッチ開始（ピンチズーム）
+                    isDragging = false;
+                    initialDistance = getDistance(e.touches[0], e.touches[1]);
+                    initialScale = currentScale;
+                    return;
+                } else if (e.touches.length === 1) {
+                    if (e.target !== mapImage) return;
+                    isDragging = true;
+                    startX = e.touches[0].clientX - translateX;
+                    startY = e.touches[0].clientY - translateY;
+                }
+            } else {
+                if (e.target !== mapImage) return;
+                isDragging = true;
+                startX = e.clientX - translateX;
+                startY = e.clientY - translateY;
+            }
         }
 
         function onDrag(e) {
+            if (e.type.includes('touch') && e.touches.length === 2) {
+                // 2本指でピンチ操作中
+                e.preventDefault();
+                if (initialDistance === null) return;
+                const currentDistance = getDistance(e.touches[0], e.touches[1]);
+                const scaleFactor = currentDistance / initialDistance;
+                currentScale = Math.min(Math.max(initialScale * scaleFactor, 0.5), 4.0);
+                updateTransform();
+                return;
+            }
+
             if (!isDragging) return;
             e.preventDefault(); 
             
@@ -203,8 +216,15 @@
             updateTransform();
         }
 
-        function endDrag() {
-            isDragging = false;
+        function endDrag(e) {
+            if (e.type.includes('touch') && e.touches.length < 2) {
+                initialDistance = null;
+            }
+            if (e.type.includes('touch') && e.touches.length === 0) {
+                isDragging = false;
+            } else if (!e.type.includes('touch')) {
+                isDragging = false;
+            }
         }
 
         mapContainer.addEventListener('mousedown', startDrag);
@@ -217,7 +237,7 @@
         mapContainer.addEventListener('touchend', endDrag);
 
         mapImage.addEventListener('dblclick', function(e) {
-            zoomMap(0.5); 
+            zoomMap(0.2); 
         });
 
         function updateUI() {
