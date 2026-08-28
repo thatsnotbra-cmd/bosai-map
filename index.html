@@ -8,65 +8,32 @@
     <!-- ========================================== -->
     <!-- ▼ Googleアナリティクスのコードはここに貼り付けます ▼ -->
     <!-- ========================================== -->
-    <!-- 例:
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-XXXXXXXXXX');
-    </script>
-    -->
-    <!-- ▲ Googleアナリティクスのコードはここまで ▲ -->
-    <!-- ========================================== -->
 
     <style>
         body, html { margin: 0; padding: 0; height: 100%; font-family: sans-serif; overflow: hidden; background-color: #eef0f4; touch-action: none; }
         
-        #top-menu { position: absolute; top: 0; left: 0; width: 100%; height: 100px; background: #2c3e50; padding: 0 20px; display: flex; gap: 15px; box-sizing: border-box; z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.2); align-items: center; }
+        /* ▼ PC用レイアウト（基本設定） ▼ */
+        #top-menu { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100px; 
+            background: #2c3e50; padding: 0 20px; display: flex; gap: 12px; 
+            box-sizing: border-box; z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.2); 
+            align-items: center; overflow-x: auto; 
+        }
         
         .menu-btn { background: transparent; border: 2px solid white; color: white; padding: 10px 20px; font-size: 18px; cursor: pointer; border-radius: 25px; white-space: nowrap; transition: 0.3s; }
         .menu-btn.active { background: white; color: #2c3e50; font-weight: bold; }
         
-        /* ▼ 変更：学校名タイトルを画面の「ど真ん中」に固定配置 ▼ */
         .school-title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: white;
+            display: flex; align-items: center; gap: 12px; color: white;
             font-family: "DNP 秀英丸ゴシック Std", "DNP Shuei MaruGo Std", sans-serif;
-            font-size: 26px;
-            font-weight: bold;
-            white-space: nowrap;
-            
-            /* 画面の中央に強制的に配置する魔法のコード */
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            
-            -webkit-user-select: none;
-            user-select: none;
+            font-size: 24px; font-weight: bold; white-space: nowrap;
+            position: absolute; left: 50%; transform: translateX(-50%);
+            -webkit-user-select: none; user-select: none;
         }
 
-        .school-logo {
-            height: 60px; 
-            object-fit: contain;
-            pointer-events: none; 
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
-        }
+        .school-logo { height: 50px; object-fit: contain; pointer-events: none; }
         
-        /* ▼ 変更：右側のメッセージ画像を一番右端に押しやる ▼ */
-        .header-banner { 
-            height: 85px; 
-            margin-left: auto; /* ここを auto に変更しました */
-            object-fit: contain;
-            pointer-events: none; 
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
-        }
+        .header-banner { height: 80px; margin-left: auto; object-fit: contain; pointer-events: none; }
         
         #arrow-btn { margin-left: 15px; font-weight: bold; font-size: 18px; padding: 10px 20px; border-radius: 25px; }
 
@@ -74,12 +41,9 @@
         #map-content { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; position: relative; transform-origin: center center; }
 
         #map-image { 
-            max-width: 45%; 
-            max-height: 85%; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-            border-radius: 8px; 
-            cursor: grab; 
-            -webkit-touch-callout: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
+            max-width: 45%; max-height: 85%; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 8px; 
+            cursor: grab; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
         }
         #map-image:active { cursor: grabbing; }
         
@@ -94,12 +58,34 @@
         #zoom-controls { position: absolute; bottom: 30px; right: 30px; display: flex; flex-direction: column; gap: 8px; z-index: 10; }
         .zoom-btn { background: white; border: 1px solid #666; color: #333; width: 50px; height: 50px; font-size: 24px; font-weight: normal; cursor: pointer; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: 0.2s; display: flex; justify-content: center; align-items: center; }
         .zoom-btn:active { background: #e0e0e0; }
-        .reset-btn {
-    height: 50px;       /* 40pxから50pxにして正方形に揃える */
-    font-size: 11px;     /* 「リセット」4文字が枠内に綺麗に収まるサイズ */
-    line-height: normal;
-    padding: 0;
-}
+        .reset-btn { font-size: 11px; height: 50px; line-height: normal; padding: 0; }
+
+        /* ========================================== */
+        /* ▼ スマホ用表示設定（画面幅が768px以下の場合） ▼ */
+        /* ========================================== */
+        @media screen and (max-width: 768px) {
+            #top-menu { height: 60px; padding: 0 10px; gap: 8px; }
+            .menu-btn { padding: 6px 12px; font-size: 13px; }
+            #arrow-btn { font-size: 13px; padding: 6px 12px; }
+
+            /* スマホでは重なりを防ぐためヘッダーの長文タイトルとバナー画像を非表示 */
+            .school-title, .header-banner { display: none; }
+
+            #map-container { padding-top: 60px; }
+
+            /* マップ画像を画面幅いっぱいに使えるよう最大幅を拡大 */
+            #map-image { max-width: 90%; max-height: 80%; }
+
+            /* スマホの狭い画面では重なり防止のため左右のパネルを非表示 */
+            .ui-panel { display: none; }
+
+            #floor-menu { bottom: 20px; left: 20px; gap: 10px; }
+            .floor-btn { width: 50px; height: 50px; font-size: 18px; }
+
+            #zoom-controls { bottom: 20px; right: 20px; gap: 6px; }
+            .zoom-btn { width: 42px; height: 42px; font-size: 20px; }
+            .reset-btn { height: 42px; font-size: 10px; }
+        }
     </style>
 </head>
 <body>
@@ -111,10 +97,9 @@
         <button class="menu-btn" onclick="selectBuilding('4号館')">4号館</button>
         <button class="menu-btn" onclick="selectBuilding('体育館')">体育館</button>
         
-        <!-- 学校のロゴとタイトル文字 -->
         <div class="school-title">
             <img src="images/ロゴ.png" class="school-logo" alt="学校ロゴ" onerror="this.style.display='none'">
-            <span>法政大学国際高等学校避難マップ</span>
+            <span>〇〇〇〇〇〇〇高等学校避難マップ</span>
         </div>
         
         <img src="images/メッセージ.png" class="header-banner" alt="正しい避難を心がけましょう" onerror="this.style.display='none'">
@@ -125,9 +110,7 @@
     <div id="map-container">
         <div id="map-content">
             <img src="images/凡例.png" class="ui-panel legend-panel" alt="凡例" onerror="this.style.display='none'">
-            
             <img id="map-image" src="images/全体図.png" alt="防災マップ" onerror="this.src='https://placehold.jp/800x600.png?text=画像準備中';">
-            
             <img src="images/避難のしかた.png" class="ui-panel evacuate-panel" alt="避難のしかた" onerror="this.style.display='none'">
         </div>
     </div>
