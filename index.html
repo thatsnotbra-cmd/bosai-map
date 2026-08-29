@@ -12,9 +12,8 @@
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
 
-      gtag('config', 'G-XXXXXXXXXX');
+      gtag('config', 'G-K7KS677P9P');
     </script>
-    <!-- ▲ ここまで ▲ -->
 
     <style>
         body, html { margin: 0; padding: 0; height: 100%; font-family: sans-serif; overflow: hidden; background-color: #eef0f4; touch-action: none; }
@@ -39,7 +38,6 @@
 
         .school-logo { height: 50px; object-fit: contain; pointer-events: none; }
         .header-banner { height: 80px; margin-left: auto; object-fit: contain; pointer-events: none; }
-        #arrow-btn { margin-left: 15px; font-weight: bold; font-size: 18px; padding: 10px 20px; border-radius: 25px; }
 
         #map-container { width: 100%; height: 100%; padding-top: 100px; box-sizing: border-box; overflow: hidden; position: relative; }
         #map-content { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; position: relative; transform-origin: center center; }
@@ -59,7 +57,21 @@
         .floor-btn { background: white; border: 2px solid #333; color: #333; width: 65px; height: 65px; font-size: 22px; font-weight: bold; cursor: pointer; border-radius: 50%; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: 0.2s; display: flex; justify-content: center; align-items: center; }
         .floor-btn.active { background: #2c3e50; border-color: #2c3e50; color: white; }
 
-        #zoom-controls { position: absolute; bottom: 30px; right: 30px; display: flex; flex-direction: column; gap: 8px; z-index: 10; }
+        /* ▼ 右下 操作コントロール群 ▼ */
+        #zoom-controls { position: absolute; bottom: 30px; right: 30px; display: flex; flex-direction: column; gap: 8px; z-index: 10; align-items: center; }
+        
+        /* 避難経路ボタン（丸型デザイン） */
+        .route-toggle-btn {
+            background: #27ae60; border: 2px solid #27ae60; color: white;
+            width: 50px; height: 50px; font-size: 26px; font-weight: bold;
+            cursor: pointer; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: 0.2s; display: flex; justify-content: center; align-items: center;
+            margin-bottom: 6px;
+        }
+        .route-toggle-btn.off {
+            background: white; border: 2px solid #666; color: #666;
+        }
+
         .zoom-btn { background: white; border: 1px solid #666; color: #333; width: 50px; height: 50px; font-size: 24px; font-weight: normal; cursor: pointer; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: 0.2s; display: flex; justify-content: center; align-items: center; }
         .zoom-btn:active { background: #e0e0e0; }
         .reset-btn { font-size: 11px; height: 50px; line-height: normal; padding: 0; }
@@ -67,14 +79,15 @@
         @media screen and (max-width: 768px) {
             #top-menu { height: 60px; padding: 0 10px; gap: 8px; }
             .menu-btn { padding: 6px 12px; font-size: 13px; }
-            #arrow-btn { font-size: 13px; padding: 6px 12px; }
             .school-title, .header-banner { display: none; }
             #map-container { padding-top: 60px; }
             #map-image { max-width: 90%; max-height: 80%; }
             .ui-panel { display: none; }
             #floor-menu { bottom: 20px; left: 20px; gap: 10px; }
             .floor-btn { width: 50px; height: 50px; font-size: 18px; }
+
             #zoom-controls { bottom: 20px; right: 20px; gap: 6px; }
+            .route-toggle-btn { width: 42px; height: 42px; font-size: 22px; margin-bottom: 4px; }
             .zoom-btn { width: 42px; height: 42px; font-size: 20px; }
             .reset-btn { height: 42px; font-size: 10px; }
         }
@@ -95,21 +108,22 @@
         </div>
         
         <img src="images/メッセージ.png" class="header-banner" alt="正しい避難を心がけましょう" onerror="this.style.display='none'">
-        <button id="arrow-btn" class="menu-btn" onclick="toggleArrow()">避難経路: OFF</button>
     </div>
 
     <div id="map-container">
         <div id="map-content">
             <img src="images/凡例.png" class="ui-panel legend-panel" alt="凡例" onerror="this.style.display='none'">
-            <img id="map-image" src="images/全体図.png" alt="防災マップ" onerror="this.src='https://placehold.jp/800x600.png?text=画像準備中';">
+            <img id="map-image" src="images/全体図_矢印.png" alt="防災マップ" onerror="this.src='https://placehold.jp/800x600.png?text=画像準備中';">
             <img src="images/避難のしかた.png" class="ui-panel evacuate-panel" alt="避難のしかた" onerror="this.style.display='none'">
         </div>
     </div>
 
     <div id="floor-menu"></div>
 
-    <!-- ズーム率の刻みを 0.2 に変更 -->
+    <!-- 右下 操作パネル -->
     <div id="zoom-controls">
+        <!-- 避難経路の矢印ボタン（初期状態ON） -->
+        <button id="arrow-btn" class="route-toggle-btn" onclick="toggleArrow()" title="避難経路の表示切替">→</button>
         <button class="zoom-btn" onclick="zoomMap(0.2)">＋</button>
         <button class="zoom-btn" onclick="zoomMap(-0.2)">－</button>
         <button class="zoom-btn reset-btn" onclick="resetZoom()">リセット</button>
@@ -127,7 +141,7 @@
 
         let currentBuilding = '全体図';
         let currentFloor = '1F';
-        let showArrow = false; 
+        let showArrow = true; // 初期設定をONに変更
         
         let currentScale = 1;
         let translateX = 0;
@@ -135,7 +149,12 @@
 
         function selectBuilding(building) {
             currentBuilding = building;
-            currentFloor = mapData[building][0]; 
+            // 4号館の場合は3階を初期選択、それ以外は一番下の階を選択
+            if (building === '4号館') {
+                currentFloor = '3F';
+            } else {
+                currentFloor = mapData[building][0]; 
+            }
             updateUI();
         }
 
@@ -172,7 +191,6 @@
         let isDragging = false;
         let startX = 0, startY = 0;
 
-        // ピンチ操作用変数
         let initialDistance = null;
         let initialScale = 1;
 
@@ -185,7 +203,6 @@
         function startDrag(e) {
             if (e.type.includes('touch')) {
                 if (e.touches.length === 2) {
-                    // 2本指タッチ開始（ピンチズーム）
                     isDragging = false;
                     initialDistance = getDistance(e.touches[0], e.touches[1]);
                     initialScale = currentScale;
@@ -206,7 +223,6 @@
 
         function onDrag(e) {
             if (e.type.includes('touch') && e.touches.length === 2) {
-                // 2本指でピンチ操作中
                 e.preventDefault();
                 if (initialDistance === null) return;
                 const currentDistance = getDistance(e.touches[0], e.touches[1]);
@@ -252,22 +268,17 @@
         });
 
         function updateUI() {
-            document.querySelectorAll('.menu-btn:not(#arrow-btn)').forEach(btn => {
+            document.querySelectorAll('.menu-btn').forEach(btn => {
                 btn.classList.remove('active');
                 if(btn.innerText.includes(currentBuilding)) btn.classList.add('active');
             });
 
+            // 避難経路ボタンのスタイル更新
             const arrowBtn = document.getElementById('arrow-btn');
             if(showArrow) {
-                arrowBtn.innerText = '避難経路: ON';
-                arrowBtn.style.backgroundColor = '#27ae60'; 
-                arrowBtn.style.borderColor = '#27ae60';
-                arrowBtn.style.color = 'white';
+                arrowBtn.classList.remove('off');
             } else {
-                arrowBtn.innerText = '避難経路: OFF';
-                arrowBtn.style.backgroundColor = 'transparent'; 
-                arrowBtn.style.borderColor = 'white';
-                arrowBtn.style.color = 'white';
+                arrowBtn.classList.add('off');
             }
 
             const floorMenu = document.getElementById('floor-menu');
