@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>防災マップ</title>
-    
-    <!-- ▼ ここにコピーしたコードをそのまま貼り付けます ▼ -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-K7KS677P9P"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-K7KS677P9P"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
@@ -42,12 +40,38 @@
         #map-container { width: 100%; height: 100%; padding-top: 100px; box-sizing: border-box; overflow: hidden; position: relative; }
         #map-content { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; position: relative; transform-origin: center center; }
 
+        #map-wrapper {
+            position: relative;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            max-width: 45%;
+            max-height: 85%;
+        }
+
         #map-image { 
-            max-width: 45%; max-height: 85%; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 8px; 
-            cursor: grab; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
+            width: 100%;
+            height: 100%;
+            max-height: 85vh;
+            object-fit: contain;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+            border-radius: 8px; 
+            cursor: grab; 
+            -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
         }
         #map-image:active { cursor: grabbing; }
+
+        /* ▼ AED矢印：上下中心を揃えるために translateY(-50%) を適用 ▼ */
+        #aed-overlay-arrow {
+            position: absolute;
+            z-index: 8;
+            pointer-events: none;
+            display: none;
+            opacity: 0;
+            transform: translateY(-50%);
+            transition: opacity 0.5s ease;
+            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.2));
+        }
         
         .ui-panel { position: absolute; z-index: 5; pointer-events: none; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
         .legend-panel { left: 8vw; top: 50%; transform: translateY(-50%); width: 22vw; max-width: 300px; min-width: 220px; }
@@ -57,10 +81,30 @@
         .floor-btn { background: white; border: 2px solid #333; color: #333; width: 65px; height: 65px; font-size: 22px; font-weight: bold; cursor: pointer; border-radius: 50%; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: 0.2s; display: flex; justify-content: center; align-items: center; }
         .floor-btn.active { background: #2c3e50; border-color: #2c3e50; color: white; }
 
-        /* ▼ 右下 操作コントロール群 ▼ */
         #zoom-controls { position: absolute; bottom: 30px; right: 30px; display: flex; flex-direction: column; gap: 8px; z-index: 10; align-items: center; }
         
-        /* 避難経路ボタン（丸型デザイン） */
+        .aed-btn-wrapper {
+            background: white; border: 2px solid #e74c3c;
+            width: 50px; height: 50px; cursor: pointer; border-radius: 50%; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); display: flex; justify-content: center; align-items: center;
+            margin-bottom: 2px; padding: 6px; box-sizing: border-box; transition: 0.2s;
+        }
+        .aed-btn-wrapper:active { background: #fdeaea; }
+
+        /* ▼ AEDメニュー（PC用：AEDアイコンの真横に表示） ▼ */
+        #aed-menu {
+            position: absolute; bottom: 220px; right: 90px;
+            background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            display: none; flex-direction: column; overflow: hidden; z-index: 20; border: 2px solid #e74c3c;
+        }
+        .aed-menu-btn {
+            background: white; border: none; border-bottom: 1px solid #eee;
+            padding: 12px 20px; font-size: 16px; color: #333; cursor: pointer;
+            text-align: left; transition: 0.2s; font-weight: bold; white-space: nowrap;
+        }
+        .aed-menu-btn:hover { background: #ffeaea; color: #e74c3c; }
+        .aed-menu-btn:last-child { border-bottom: none; }
+
         .route-toggle-btn {
             background: #27ae60; border: 2px solid #27ae60; color: white;
             width: 50px; height: 50px; font-size: 26px; font-weight: bold;
@@ -68,9 +112,7 @@
             transition: 0.2s; display: flex; justify-content: center; align-items: center;
             margin-bottom: 6px;
         }
-        .route-toggle-btn.off {
-            background: white; border: 2px solid #666; color: #666;
-        }
+        .route-toggle-btn.off { background: white; border: 2px solid #666; color: #666; }
 
         .zoom-btn { background: white; border: 1px solid #666; color: #333; width: 50px; height: 50px; font-size: 24px; font-weight: normal; cursor: pointer; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: 0.2s; display: flex; justify-content: center; align-items: center; }
         .zoom-btn:active { background: #e0e0e0; }
@@ -81,12 +123,15 @@
             .menu-btn { padding: 6px 12px; font-size: 13px; }
             .school-title, .header-banner { display: none; }
             #map-container { padding-top: 60px; }
-            #map-image { max-width: 90%; max-height: 80%; }
+            #map-wrapper { max-width: 90%; max-height: 80%; }
             .ui-panel { display: none; }
             #floor-menu { bottom: 20px; left: 20px; gap: 10px; }
             .floor-btn { width: 50px; height: 50px; font-size: 18px; }
 
             #zoom-controls { bottom: 20px; right: 20px; gap: 6px; }
+            .aed-btn-wrapper { width: 42px; height: 42px; padding: 4px; }
+            #aed-menu { bottom: 170px; right: 70px; }
+            .aed-menu-btn { font-size: 14px; padding: 10px 15px; }
             .route-toggle-btn { width: 42px; height: 42px; font-size: 22px; margin-bottom: 4px; }
             .zoom-btn { width: 42px; height: 42px; font-size: 20px; }
             .reset-btn { height: 42px; font-size: 10px; }
@@ -113,16 +158,28 @@
     <div id="map-container">
         <div id="map-content">
             <img src="images/凡例.png" class="ui-panel legend-panel" alt="凡例" onerror="this.style.display='none'">
-            <img id="map-image" src="images/全体図_矢印.png" alt="防災マップ" onerror="this.src='https://placehold.jp/800x600.png?text=画像準備中';">
+            
+            <div id="map-wrapper">
+                <img id="map-image" src="images/全体図_矢印.png" alt="防災マップ" onerror="this.src='https://placehold.jp/800x600.png?text=画像準備中';">
+                <img id="aed-overlay-arrow" src="images/矢印_AED.png" alt="AED位置">
+            </div>
+
             <img src="images/避難のしかた.png" class="ui-panel evacuate-panel" alt="避難のしかた" onerror="this.style.display='none'">
         </div>
     </div>
 
+    <div id="aed-menu">
+        <button class="aed-menu-btn" onclick="triggerAedArrow('2号館', '1F', '2gokan-1f')">2号館：女子トイレ入口前</button>
+        <button class="aed-menu-btn" onclick="triggerAedArrow('2号館', '2F', '2gokan-2f')">ピロティ側階段：2階</button>
+        <button class="aed-menu-btn" onclick="triggerAedArrow('体育館', '1F', 'gym-1f')">体育館1階：オレンジの間入口</button>
+    </div>
+
     <div id="floor-menu"></div>
 
-    <!-- 右下 操作パネル -->
     <div id="zoom-controls">
-        <!-- 避難経路の矢印ボタン（初期状態ON） -->
+        <div class="aed-btn-wrapper" onclick="toggleAedMenu()" title="AEDの場所">
+            <img src="images/AED.png" alt="AED" style="width: 100%; height: 100%; object-fit: contain; border-radius: 50%;">
+        </div>
         <button id="arrow-btn" class="route-toggle-btn" onclick="toggleArrow()" title="避難経路の表示切替">→</button>
         <button class="zoom-btn" onclick="zoomMap(0.2)">＋</button>
         <button class="zoom-btn" onclick="zoomMap(-0.2)">－</button>
@@ -139,9 +196,18 @@
             '体育館': ['1F', '2F']
         };
 
+        // ▼ 各AEDアイコンの垂直中心と右端に正確に合わせた座標 ▼
+        const aedPositions = {
+            '2gokan-1f': { top: '85.5%', left: '14.5%', width: '31%' }, // 2号館1階
+            '2gokan-2f': { top: '8.0%', left: '30.5%', width: '30%' }, // 2号館2階
+            'gym-1f':    { top: '49.5%', left: '67.0%', width: '30%' }  // 体育館1階
+        };
+
         let currentBuilding = '全体図';
         let currentFloor = '1F';
-        let showArrow = true; // 初期設定をONに変更
+        let showArrow = true;
+        let aedTimer = null;
+        let fadeTimer = null;
         
         let currentScale = 1;
         let translateX = 0;
@@ -149,23 +215,61 @@
 
         function selectBuilding(building) {
             currentBuilding = building;
-            // 4号館の場合は3階を初期選択、それ以外は一番下の階を選択
-            if (building === '4号館') {
-                currentFloor = '3F';
-            } else {
-                currentFloor = mapData[building][0]; 
-            }
+            currentFloor = (building === '4号館') ? '3F' : mapData[building][0]; 
+            hideAedArrowImmediately();
             updateUI();
         }
 
         function selectFloor(floor) {
             currentFloor = floor;
+            hideAedArrowImmediately();
             updateUI();
         }
 
         function toggleArrow() {
             showArrow = !showArrow;
             updateUI();
+        }
+
+        function toggleAedMenu() {
+            const menu = document.getElementById('aed-menu');
+            menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        function hideAedArrowImmediately() {
+            const arrow = document.getElementById('aed-overlay-arrow');
+            if (aedTimer) clearTimeout(aedTimer);
+            if (fadeTimer) clearTimeout(fadeTimer);
+            arrow.style.display = 'none';
+            arrow.style.opacity = '0';
+        }
+
+        function triggerAedArrow(building, floor, positionKey) {
+            document.getElementById('aed-menu').style.display = 'none';
+            hideAedArrowImmediately();
+
+            currentBuilding = building;
+            currentFloor = floor;
+            updateUI();
+            resetZoom();
+
+            const arrow = document.getElementById('aed-overlay-arrow');
+            const pos = aedPositions[positionKey];
+            if (pos) {
+                arrow.style.top = pos.top;
+                arrow.style.left = pos.left;
+                arrow.style.width = pos.width;
+                arrow.style.display = 'block';
+
+                setTimeout(() => { arrow.style.opacity = '1'; }, 20);
+
+                aedTimer = setTimeout(() => {
+                    arrow.style.opacity = '0';
+                    fadeTimer = setTimeout(() => {
+                        arrow.style.display = 'none';
+                    }, 500);
+                }, 3000);
+            }
         }
 
         function updateTransform() {
@@ -190,7 +294,6 @@
         const mapImage = document.getElementById('map-image');
         let isDragging = false;
         let startX = 0, startY = 0;
-
         let initialDistance = null;
         let initialScale = 1;
 
@@ -201,6 +304,10 @@
         }
 
         function startDrag(e) {
+            if (!e.target.closest('#aed-menu') && !e.target.closest('.aed-btn-wrapper')) {
+                document.getElementById('aed-menu').style.display = 'none';
+            }
+
             if (e.type.includes('touch')) {
                 if (e.touches.length === 2) {
                     isDragging = false;
@@ -244,14 +351,9 @@
         }
 
         function endDrag(e) {
-            if (e.type.includes('touch') && e.touches.length < 2) {
-                initialDistance = null;
-            }
-            if (e.type.includes('touch') && e.touches.length === 0) {
-                isDragging = false;
-            } else if (!e.type.includes('touch')) {
-                isDragging = false;
-            }
+            if (e.type.includes('touch') && e.touches.length < 2) initialDistance = null;
+            if (e.type.includes('touch') && e.touches.length === 0) isDragging = false;
+            else if (!e.type.includes('touch')) isDragging = false;
         }
 
         mapContainer.addEventListener('mousedown', startDrag);
@@ -273,7 +375,6 @@
                 if(btn.innerText.includes(currentBuilding)) btn.classList.add('active');
             });
 
-            // 避難経路ボタンのスタイル更新
             const arrowBtn = document.getElementById('arrow-btn');
             if(showArrow) {
                 arrowBtn.classList.remove('off');
@@ -305,8 +406,6 @@
             } else {
                 img.src = `images/${currentBuilding}_${currentFloor}${arrowSuffix}.png`;
             }
-            
-            resetZoom();
         }
 
         mapImage.addEventListener('contextmenu', function(e) { e.preventDefault(); });
