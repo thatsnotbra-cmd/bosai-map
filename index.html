@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>防災マップ</title>
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-K7KS677P9P"></script>
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-K7KS677P9P"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
@@ -61,7 +62,6 @@
         }
         #map-image:active { cursor: grabbing; }
 
-        /* ▼ AED矢印：上下中心を揃えるために translateY(-50%) を適用 ▼ */
         #aed-overlay-arrow {
             position: absolute;
             z-index: 8;
@@ -91,7 +91,6 @@
         }
         .aed-btn-wrapper:active { background: #fdeaea; }
 
-        /* ▼ AEDメニュー（PC用：AEDアイコンの真横に表示） ▼ */
         #aed-menu {
             position: absolute; bottom: 220px; right: 90px;
             background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
@@ -196,11 +195,23 @@
             '体育館': ['1F', '2F']
         };
 
-        // ▼ 各AEDアイコンの垂直中心と右端に正確に合わせた座標 ▼
-        const aedPositions = {
+        // ==========================================
+        // ▼ 矢印の位置調整（PC用） ▼
+        // ==========================================
+        const aedPositionsPC = {
             '2gokan-1f': { top: '85.5%', left: '14.5%', width: '31%' }, // 2号館1階
-            '2gokan-2f': { top: '8.0%', left: '30.5%', width: '30%' }, // 2号館2階
+            '2gokan-2f': { top: '8.0%',  left: '30.5%', width: '30%' }, // 2号館2階
             'gym-1f':    { top: '49.5%', left: '67.0%', width: '30%' }  // 体育館1階
+        };
+
+        // ==========================================
+        // ▼ 矢印の位置調整（スマホ用） ▼
+        // ※スマホで見ながらここの数値を微調整してください
+        // ==========================================
+        const aedPositionsMobile = {
+            '2gokan-1f': { top: '81.5%', left: '14.5%', width: '31%' }, // 2号館1階
+            '2gokan-2f': { top: '12.0%',  left: '30.5%', width: '30%' }, // 2号館2階
+            'gym-1f':    { top: '50.0%', left: '67.0%', width: '30%' }  // 体育館1階
         };
 
         let currentBuilding = '全体図';
@@ -254,7 +265,12 @@
             resetZoom();
 
             const arrow = document.getElementById('aed-overlay-arrow');
-            const pos = aedPositions[positionKey];
+
+            // 画面幅が768px以下の時はスマホ用、それ以外はPC用の座標を使用
+            const isMobile = window.innerWidth <= 768;
+            const positions = isMobile ? aedPositionsMobile : aedPositionsPC;
+            const pos = positions[positionKey];
+
             if (pos) {
                 arrow.style.top = pos.top;
                 arrow.style.left = pos.left;
